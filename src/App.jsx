@@ -132,7 +132,7 @@ function PortalCliente({empresas}){
   function pedirWhatsApp(empresa){
     playPlim();
     const msg=encodeURIComponent(
-      `🛵 *Pedido via Start Delivery*\n\nOlá, ${empresa.nome}! Vim pelo site da *Start Delivery* e quero fazer um pedido.\n\nPode me enviar o cardápio? 😊\n\n_Start Delivery · Montividiu/GO_`
+      `🛵 *Pedido via Start Delivery*\n\nOlá, ${empresa.nome}! Vim pelo site da *Start Delivery* gostaria de realizar um pedido.\n\😊\n\n_Start Delivery · Montividiu/GO_`
     );
     window.open(`https://wa.me/${empresa.whatsapp}?text=${msg}`,"_blank");
     t.show(`✅ WhatsApp de ${empresa.nome} aberto!`);
