@@ -819,7 +819,7 @@ function PainelAdmin({pedidos,empresas}){
   const [nova,setNova]=useState({nome:"",cats:["Restaurante"],emoji:"🏪",whatsapp:"",telefone:"",instagram:"",avaliacao:"5.0",tempoMin:"20",tempoMax:"40"});
   const t=useToast();
 
-  function login(){if(senha==="start2024")setLogado(true);else{t.show("Senha incorreta",RED);}}
+  function login(){if(senha==="start123")setLogado(true);else{t.show("Senha incorreta",RED);}}
   function toggleNovaCat(c){
     setNova(n=>({...n,cats:n.cats.includes(c)?n.cats.filter(x=>x!==c):[...n.cats,c]}));
   }
@@ -872,7 +872,6 @@ function PainelAdmin({pedidos,empresas}){
           style={{width:"100%",padding:"11px 12px",borderRadius:9,border:`1px solid ${BORDER}`,
             background:BG2,color:TEXT,fontSize:14,boxSizing:"border-box",marginBottom:12}}/>
         <Btn onClick={login} full>Entrar</Btn>
-        <p style={{textAlign:"center",color:MUTED,fontSize:11,margin:"10px 0 0"}}>Senha: start2024</p>
       </Card>
     </div>
   );
@@ -1234,3 +1233,4 @@ export default function App(){
     </div>
   );
 }
+
