@@ -139,6 +139,15 @@ export async function atualizarPedido(id, campos) {
 // ENTREGADORES
 // ════════════════════════════════════════════════════════════════════
 
+function entregadorDoBanco(row) {
+  return {
+    telefone: row.telefone,
+    nome: row.nome || "",
+    empresasIds: row.empresas_ids || [],
+    status: row.status || "pendente",
+  };
+}
+
 export async function buscarEntregadorPorTelefone(telefone) {
   const { data, error } = await supabase
     .from('entregadores')
@@ -146,13 +155,31 @@ export async function buscarEntregadorPorTelefone(telefone) {
     .eq('telefone', telefone)
     .maybeSingle();
   if (error) throw error;
-  return data ? { telefone: data.telefone, empresasIds: data.empresas_ids || [] } : null;
+  return data ? entregadorDoBanco(data) : null;
 }
 
-export async function salvarEntregador(telefone, empresasIds) {
+// Cadastro novo de entregador: sempre entra como "pendente", aguardando aprovação do admin
+export async function salvarEntregador(telefone, nome, empresasIds) {
   const { error } = await supabase
     .from('entregadores')
-    .upsert({ telefone, empresas_ids: empresasIds }, { onConflict: 'telefone' });
+    .upsert({ telefone, nome, empresas_ids: empresasIds, status: 'pendente' }, { onConflict: 'telefone' });
+  if (error) throw error;
+}
+
+export async function buscarTodosEntregadores() {
+  const { data, error } = await supabase
+    .from('entregadores')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data.map(entregadorDoBanco);
+}
+
+export async function atualizarStatusEntregador(telefone, status) {
+  const { error } = await supabase
+    .from('entregadores')
+    .update({ status })
+    .eq('telefone', telefone);
   if (error) throw error;
 }
 
@@ -174,6 +201,16 @@ export function escutarEmpresas(callback) {
   const canal = supabase
     .channel('empresas-mudancas')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'empresas' }, () => {
+      callback();
+    })
+    .subscribe();
+  return () => supabase.removeChannel(canal);
+}
+
+export function escutarEntregadores(callback) {
+  const canal = supabase
+    .channel('entregadores-mudancas')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'entregadores' }, () => {
       callback();
     })
     .subscribe();
