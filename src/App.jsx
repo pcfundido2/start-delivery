@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import {
   buscarEmpresas, criarEmpresa, atualizarEmpresa, excluirEmpresa,
   buscarPedidos, criarPedido, atualizarPedido,
-  buscarEntregadorPorTelefone, salvarEntregador,
-  escutarPedidos, escutarEmpresas,
+  buscarEntregadorPorTelefone, salvarEntregador, buscarTodosEntregadores, atualizarStatusEntregador,
+  escutarPedidos, escutarEmpresas, escutarEntregadores,
 } from "./data";
 
 const ORANGE="#FF6B1A", ORANGE_DEEP="#E85D04", GREEN="#10B981", RED="#EF4444", BLUE="#3B82F6";
@@ -59,14 +59,15 @@ function Btn({onClick,children,variant="primary",size="md",disabled=false,full=f
   );
 }
 
-function Input({label,placeholder,value,onChange,type="text",hint,onKeyDown}){
+function Input({label,placeholder,value,onChange,type="text",hint,onKeyDown,disabled=false}){
   return(
     <div style={{marginBottom:14}}>
       {label&&<label style={{display:"block",marginBottom:5,fontSize:12,fontWeight:600,color:TEXT}}>{label}</label>}
       {hint&&<p style={{margin:"0 0 5px",fontSize:11,color:MUTED}}>{hint}</p>}
-      <input type={type} placeholder={placeholder} value={value} onChange={onChange} onKeyDown={onKeyDown} className="st-input"
+      <input type={type} placeholder={placeholder} value={value} onChange={onChange} onKeyDown={onKeyDown} disabled={disabled} className="st-input"
         style={{width:"100%",padding:"10px 12px",borderRadius:9,border:`1px solid ${BORDER}`,
-          background:BG2,color:TEXT,fontSize:13,outline:"none",boxSizing:"border-box"}}/>
+          background:BG2,color:TEXT,fontSize:13,outline:"none",boxSizing:"border-box",
+          opacity:disabled?0.6:1,cursor:disabled?"not-allowed":"text"}}/>
     </div>
   );
 }
@@ -116,6 +117,138 @@ function useToast(){
 }
 
 // ════════════════════════════════════════════════════════════════════
+// Tela de detalhe temática especial — Drogaria Martins (farmácia)
+// ════════════════════════════════════════════════════════════════════
+function DetalheDrogariaMartins({detalhe,onVoltar,pedirWhatsApp,toast}){
+  const RED_DEEP="#C81E1E";
+  return(
+    <div className="st-screen" style={{maxWidth:480,margin:"0 auto",paddingBottom:"2rem"}}>
+      <Toast msg={toast.msg} color={toast.color}/>
+
+      {/* banner vermelho com textura de cruz farmacêutica */}
+      <div style={{position:"relative",background:`linear-gradient(135deg, ${RED} 0%, ${RED_DEEP} 100%)`,
+        padding:"1.5rem",overflow:"hidden",borderBottomLeftRadius:28,borderBottomRightRadius:28}}>
+        {/* cruz decorativa de fundo */}
+        <svg width="140" height="140" viewBox="0 0 100 100" style={{position:"absolute",right:-10,top:10,opacity:0.13}}>
+          <rect x="35" y="0" width="30" height="100" rx="8" fill="#fff"/>
+          <rect x="0" y="35" width="100" height="30" rx="8" fill="#fff"/>
+        </svg>
+        {/* linha curva decorativa inferior */}
+        <svg viewBox="0 0 480 40" style={{position:"absolute",bottom:-1,left:0,width:"100%",height:30}}>
+          <path d="M0,10 Q240,40 480,10 L480,40 L0,40 Z" fill="#F59E0B"/>
+        </svg>
+
+        <button onClick={onVoltar} className="st-back-btn"
+          style={{background:"#fff",border:"none",color:RED,borderRadius:9,
+            padding:"6px 16px",fontSize:13,cursor:"pointer",marginBottom:16,fontWeight:700,
+            display:"flex",alignItems:"center",gap:6,boxShadow:"0 2px 8px rgba(0,0,0,0.15)"}}>
+          ← Voltar
+        </button>
+
+        <div style={{display:"flex",gap:16,alignItems:"center",position:"relative",zIndex:1}}>
+          <div style={{width:74,height:74,borderRadius:18,background:"#fff",
+            display:"flex",alignItems:"center",justifyContent:"center",fontSize:38,flexShrink:0,
+            boxShadow:"0 8px 20px rgba(0,0,0,0.2)"}}>
+            {detalhe.emoji||"💊"}
+          </div>
+          <div>
+            <h2 style={{margin:0,color:"#fff",fontSize:23,fontWeight:800}}>{detalhe.nome}</h2>
+            <p style={{margin:"4px 0 0",color:"#FCD34D",fontSize:14,fontWeight:700}}>Farmácia</p>
+            <div style={{display:"flex",gap:12,marginTop:7,alignItems:"center"}}>
+              <span style={{display:"flex",alignItems:"center",gap:4,color:"#FCD34D",fontSize:13,fontWeight:600}}>
+                {"★".repeat(Math.floor(detalhe.avaliacao||0))} {(detalhe.avaliacao||0).toFixed(1)}
+              </span>
+              {detalhe.tempoMin&&(
+                <span style={{color:"rgba(255,255,255,0.92)",fontSize:13}}>🕐 {detalhe.tempoMin}–{detalhe.tempoMax} min</span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{padding:"1.5rem 1.25rem 0"}}>
+        {/* card "Como funciona" */}
+        <div className="st-fade-in" style={{display:"flex",gap:14,alignItems:"flex-start",
+          background:"#FFFBEB",border:`1px solid #FCD34D55`,borderRadius:16,padding:"1.1rem",
+          marginBottom:24,position:"relative",overflow:"hidden"}}>
+          <div style={{width:46,height:46,borderRadius:14,background:"#FEF3C7",flexShrink:0,
+            display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>🛍️</div>
+          <div>
+            <p style={{margin:"0 0 4px",fontWeight:700,fontSize:14,color:RED_DEEP}}>Como funciona?</p>
+            <p style={{margin:0,fontSize:13,color:MUTED,lineHeight:1.6}}>
+              Escolha como quer entrar em contato com <strong>{detalhe.nome}</strong>. A empresa vai combinar os detalhes do seu pedido com você!
+            </p>
+          </div>
+        </div>
+
+        {/* título "Formas de contato" com linhas decorativas */}
+        <div style={{display:"flex",alignItems:"center",gap:10,justifyContent:"center",marginBottom:20}}>
+          <span style={{flex:1,height:1,background:`${RED}33`}}/>
+          <span style={{color:RED_DEEP,fontWeight:700,fontSize:14,whiteSpace:"nowrap"}}>💊 Formas de contato</span>
+          <span style={{flex:1,height:1,background:`${RED}33`}}/>
+        </div>
+
+        {detalhe.whatsapp&&(
+          <button onClick={()=>pedirWhatsApp(detalhe)} className="st-fade-in st-contact-btn"
+            style={{width:"100%",display:"flex",alignItems:"center",gap:14,padding:"16px",
+              borderRadius:16,border:"1px solid #E5E7EB",borderLeft:"4px solid #22C55E",background:BG,
+              cursor:"pointer",marginBottom:14,textAlign:"left",boxShadow:"0 2px 10px rgba(0,0,0,0.05)"}}>
+            <div style={{width:46,height:46,borderRadius:13,background:"#22C55E",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>💬</div>
+            <div style={{flex:1}}>
+              <p style={{margin:0,fontWeight:700,fontSize:15,color:"#16A34A"}}>WhatsApp</p>
+              <p style={{margin:"3px 0 6px",fontSize:12,color:MUTED}}>Mensagem automática da Start Delivery</p>
+              <Badge color={"#16A34A"} text="⚡ Resposta rápida"/>
+            </div>
+            <span style={{color:"#22C55E",fontSize:18,background:"#DCFCE7",borderRadius:99,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center"}}>→</span>
+          </button>
+        )}
+
+        {detalhe.telefone&&(
+          <button onClick={()=>window.open(`tel:${detalhe.telefone.replace(/\D/g,"")}`)} className="st-fade-in st-contact-btn"
+            style={{width:"100%",display:"flex",alignItems:"center",gap:14,padding:"16px",
+              borderRadius:16,border:"1px solid #E5E7EB",borderLeft:`4px solid ${RED}`,background:BG,
+              cursor:"pointer",marginBottom:18,textAlign:"left",boxShadow:"0 2px 10px rgba(0,0,0,0.05)"}}>
+            <div style={{width:46,height:46,borderRadius:13,background:RED,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>📞</div>
+            <div style={{flex:1}}>
+              <p style={{margin:0,fontWeight:700,fontSize:15,color:RED_DEEP}}>Ligar</p>
+              <p style={{margin:"3px 0 6px",fontSize:13,color:TEXT,fontWeight:500}}>{detalhe.telefone}</p>
+              <Badge color={RED} text="📞 Atendimento direto"/>
+            </div>
+            <span style={{color:RED,fontSize:18,background:`${RED}18`,borderRadius:99,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center"}}>→</span>
+          </button>
+        )}
+
+        {detalhe.instagram&&(
+          <button onClick={()=>window.open(`https://instagram.com/${detalhe.instagram}`,"_blank")} className="st-fade-in st-contact-btn"
+            style={{width:"100%",display:"flex",alignItems:"center",gap:14,padding:"16px",
+              borderRadius:16,border:"1px solid #E5E7EB",borderLeft:"4px solid #E1306C",background:BG,
+              cursor:"pointer",marginBottom:18,textAlign:"left",boxShadow:"0 2px 10px rgba(0,0,0,0.05)"}}>
+            <div style={{width:46,height:46,borderRadius:13,background:"#E1306C",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>📸</div>
+            <div style={{flex:1}}>
+              <p style={{margin:0,fontWeight:700,fontSize:15,color:"#E1306C"}}>Instagram</p>
+              <p style={{margin:"3px 0 0",fontSize:12,color:MUTED}}>@{detalhe.instagram}</p>
+            </div>
+            <span style={{color:"#E1306C",fontSize:18,background:"#E1306C18",borderRadius:99,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center"}}>→</span>
+          </button>
+        )}
+
+        {/* selo de pedido seguro */}
+        <div style={{display:"flex",alignItems:"center",gap:12,border:"1px dashed #F59E0B66",
+          borderRadius:14,padding:"0.9rem 1.1rem",marginTop:6}}>
+          <div style={{width:40,height:40,borderRadius:12,background:"#FEF3C7",flexShrink:0,
+            display:"flex",alignItems:"center",justifyContent:"center",fontSize:19}}>🛡️</div>
+          <div style={{flex:1}}>
+            <p style={{margin:0,fontWeight:700,fontSize:13}}>Pedido seguro</p>
+            <p style={{margin:"2px 0 0",fontSize:12,color:MUTED}}>Seus dados e informações estão protegidos com a gente.</p>
+          </div>
+          <span style={{fontSize:18,color:"#F59E0B"}}>🔒</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════
 // 1. PORTAL DO CLIENTE
 // ════════════════════════════════════════════════════════════════════
 function PortalCliente({empresas}){
@@ -132,7 +265,7 @@ function PortalCliente({empresas}){
   function pedirWhatsApp(empresa){
     playPlim();
     const msg=encodeURIComponent(
-      `🛵 *Pedido via Start Delivery*\n\nOlá, ${empresa.nome}! Vim pelo site da *Start Delivery* gostaria de realizar um pedido.\n\😊\n\n_Start Delivery · Montividiu/GO_`
+      `🛵 *Pedido via Start Delivery*\n\nOlá, ${empresa.nome}! Vim pelo site da *Start Delivery* e gostaria de realizar um pedido. 😊\n\n_Start Delivery · Montividiu/GO_`
     );
     window.open(`https://wa.me/${empresa.whatsapp}?text=${msg}`,"_blank");
     t.show(`✅ WhatsApp de ${empresa.nome} aberto!`);
@@ -140,6 +273,10 @@ function PortalCliente({empresas}){
 
   // tela de contatos
   if(detalhe){
+    const isDrogariaMartins = detalhe.nome === "Drogaria Martins";
+    if(isDrogariaMartins){
+      return <DetalheDrogariaMartins detalhe={detalhe} onVoltar={()=>setDetalhe(null)} pedirWhatsApp={pedirWhatsApp} toast={t}/>;
+    }
     return(
       <div className="st-screen" style={{maxWidth:480,margin:"0 auto",paddingBottom:"2rem"}}>
         <Toast msg={t.msg} color={t.color}/>
@@ -174,7 +311,7 @@ function PortalCliente({empresas}){
         <div className="st-fade-in" style={{margin:"1rem 1.25rem 0",background:ORANGE+"12",border:`1px solid ${ORANGE}33`,borderRadius:11,padding:"0.9rem 1rem"}}>
           <p style={{margin:"0 0 3px",fontWeight:600,fontSize:13,color:ORANGE}}>Como funciona?</p>
           <p style={{margin:0,fontSize:12,color:MUTED,lineHeight:1.6}}>
-            Escolha como quer entrar em contato com <strong>{detalhe.nome}</strong>. A empresa te enviará o cardápio e combinam os detalhes do pedido!
+            Escolha como quer entrar em contato com <strong>{detalhe.nome}</strong>. A empresa vai combinar os detalhes do seu pedido com você!
           </p>
         </div>
 
@@ -525,7 +662,8 @@ function PedidoCard({p}){
 // ════════════════════════════════════════════════════════════════════
 function PainelEntregador({pedidos,empresas}){
   const [carregando,setCarregando]=useState(true);
-  const [cadastrado,setCadastrado]=useState(false);
+  const [statusCadastro,setStatusCadastro]=useState(null); // null=sem cadastro, "pendente", "aprovado", "rejeitado"
+  const [nomeCadastro,setNomeCadastro]=useState("");
   const [telCadastro,setTelCadastro]=useState("");
   const [empresasSel,setEmpresasSel]=useState([]);
   const [online,setOnline]=useState(true);
@@ -534,44 +672,53 @@ function PainelEntregador({pedidos,empresas}){
   const t=useToast();
   const prevLen=useRef(0);
 
-  // carrega cadastro salvo (telefone lembrado neste navegador + dados confirmados no banco)
+  async function verificarStatus(tel){
+    try{
+      const perfil=await buscarEntregadorPorTelefone(tel);
+      if(perfil){
+        setNomeCadastro(perfil.nome);
+        setTelCadastro(perfil.telefone);
+        setEmpresasSel(perfil.empresasIds);
+        setStatusCadastro(perfil.status);
+        return perfil.status;
+      }
+    }catch(_){
+      // sem cadastro encontrado
+    }
+    return null;
+  }
+
+  // carrega cadastro salvo (telefone lembrado neste navegador) e confere status no banco
   useEffect(()=>{
     (async()=>{
       try{
         const telSalvo=localStorage.getItem("st_entregador_telefone");
         if(telSalvo){
-          const perfil=await buscarEntregadorPorTelefone(telSalvo);
-          if(perfil){
-            setTelCadastro(perfil.telefone);
-            setEmpresasSel(perfil.empresasIds);
-            setCadastrado(true);
-          }
+          await verificarStatus(telSalvo);
         }
-      }catch(_){
-        // sem cadastro encontrado, segue para tela de cadastro
-      }
+      }catch(_){}
       setCarregando(false);
     })();
   },[]);
 
+  // enquanto está pendente, confere periodicamente se o admin já aprovou
+  useEffect(()=>{
+    if(statusCadastro!=="pendente") return;
+    const intervalo=setInterval(()=>{
+      verificarStatus(telCadastro);
+    },4000);
+    return ()=>clearInterval(intervalo);
+  },[statusCadastro,telCadastro]);
+
   // restaura a entrega em andamento (caso a página seja recarregada no meio de uma corrida)
   useEffect(()=>{
-    if(!cadastrado||carregando) return;
+    if(statusCadastro!=="aprovado"||carregando) return;
     const num=normalizaTel(telCadastro);
     const minhaEmRota=pedidos.find(p=>p.status==="em_rota"&&p.entregadorTel===num);
     if(minhaEmRota&&!emEntrega){
       setEmEntrega(minhaEmRota);
     }
-  },[cadastrado,carregando,pedidos]);
-
-  async function salvarPerfil(tel,emps){
-    try{
-      await salvarEntregador(tel,emps);
-      localStorage.setItem("st_entregador_telefone",tel);
-    }catch(_){
-      t.show("⚠️ Erro ao salvar cadastro. Tente novamente.",RED);
-    }
-  }
+  },[statusCadastro,carregando,pedidos]);
 
   function toggleEmpresaSel(id){
     setEmpresasSel(prev=>prev.includes(id)?prev.filter(x=>x!==id):[...prev,id]);
@@ -579,28 +726,43 @@ function PainelEntregador({pedidos,empresas}){
 
   async function concluirCadastro(){
     const num=normalizaTel(telCadastro);
+    if(!nomeCadastro.trim()){ t.show("⚠️ Digite seu nome",RED); return; }
     if(!num){ t.show("⚠️ Digite seu número de telefone",RED); return; }
     if(empresasSel.length===0){ t.show("⚠️ Selecione ao menos 1 empresa para atender",RED); return; }
-    await salvarPerfil(num,empresasSel);
-    setTelCadastro(num);
-    setCadastrado(true);
-    setEditandoEmpresas(false);
-    t.show("✅ Cadastro salvo! Você só verá corridas das empresas selecionadas.");
+    try{
+      // se já era aprovado e só está editando as empresas, mantém aprovado sem precisar de aprovação de novo
+      if(statusCadastro==="aprovado"&&editandoEmpresas){
+        await salvarEntregador(num,nomeCadastro.trim(),empresasSel);
+        await atualizarStatusEntregador(num,"aprovado");
+        setStatusCadastro("aprovado");
+        setEditandoEmpresas(false);
+        t.show("✅ Empresas atualizadas!");
+      }else{
+        await salvarEntregador(num,nomeCadastro.trim(),empresasSel);
+        localStorage.setItem("st_entregador_telefone",num);
+        setTelCadastro(num);
+        setStatusCadastro("pendente");
+        t.show("📨 Cadastro enviado! Aguarde a aprovação da Start Delivery.");
+      }
+    }catch(_){
+      t.show("⚠️ Erro ao salvar cadastro. Tente novamente.",RED);
+    }
   }
 
   // só mostra corridas das empresas que esse entregador escolheu atender
+  const aprovado=statusCadastro==="aprovado";
   const disponiveisTodas=pedidos.filter(p=>p.status==="aguardando_entregador");
-  const disponiveis=disponiveisTodas.filter(p=>empresasSel.includes(p.empresaId));
+  const disponiveis=aprovado?disponiveisTodas.filter(p=>empresasSel.includes(p.empresaId)):[];
   const meuTel=normalizaTel(telCadastro);
   const entregues=pedidos.filter(p=>p.status==="entregue"&&p.entregadorTel===meuTel);
 
   useEffect(()=>{
-    if(online&&disponiveis.length>prevLen.current){
+    if(online&&aprovado&&disponiveis.length>prevLen.current){
       playPlim(1000);
       t.show("🔔 Nova corrida disponível!",ORANGE);
     }
     prevLen.current=disponiveis.length;
-  },[disponiveis.length,online]);
+  },[disponiveis.length,online,aprovado]);
 
   async function aceitar(p){
     const num=normalizaTel(telCadastro);
@@ -634,19 +796,58 @@ function PainelEntregador({pedidos,empresas}){
     return <div style={{minHeight:"40vh"}}/>;
   }
 
+  // ── tela: aguardando aprovação do admin ───────────────────────────
+  if(statusCadastro==="pendente"){
+    return(
+      <div className="st-screen" style={{maxWidth:420,margin:"0 auto",padding:"3rem 1.5rem",textAlign:"center"}}>
+        <Toast msg={t.msg} color={t.color}/>
+        <span style={{fontSize:52}}>⏳</span>
+        <h2 style={{margin:"16px 0 6px",fontSize:18}}>Cadastro em análise</h2>
+        <p style={{color:MUTED,fontSize:13,lineHeight:1.6,margin:"0 0 20px"}}>
+          Olá, <strong style={{color:TEXT}}>{nomeCadastro}</strong>! Seu cadastro foi enviado e está aguardando aprovação da Start Delivery.<br/><br/>
+          Isso é feito para garantir a segurança das entregas. Assim que for aprovado, você já poderá ver as corridas disponíveis aqui mesmo.
+        </p>
+        <Card style={{textAlign:"left"}}>
+          <p style={{margin:0,fontSize:12,color:MUTED}}>📞 Telefone cadastrado</p>
+          <p style={{margin:"2px 0 0",fontSize:14,fontWeight:600}}>{telCadastro}</p>
+        </Card>
+      </div>
+    );
+  }
+
+  // ── tela: cadastro rejeitado ───────────────────────────────────────
+  if(statusCadastro==="rejeitado"){
+    return(
+      <div className="st-screen" style={{maxWidth:420,margin:"0 auto",padding:"3rem 1.5rem",textAlign:"center"}}>
+        <Toast msg={t.msg} color={t.color}/>
+        <span style={{fontSize:52}}>🚫</span>
+        <h2 style={{margin:"16px 0 6px",fontSize:18,color:RED}}>Cadastro não aprovado</h2>
+        <p style={{color:MUTED,fontSize:13,lineHeight:1.6,margin:"0 0 20px"}}>
+          Seu cadastro como entregador não foi aprovado pela Start Delivery.<br/><br/>
+          Se você acredita que isso é um engano, entre em contato com a administração.
+        </p>
+      </div>
+    );
+  }
+
   // ── tela: cadastro / edição de empresas atendidas ─────────────────
-  if(!cadastrado||editandoEmpresas){
+  if(statusCadastro!=="aprovado"||editandoEmpresas){
     return(
       <div className="st-screen" style={{maxWidth:460,margin:"0 auto",padding:"2rem 1.5rem"}}>
         <Toast msg={t.msg} color={t.color}/>
         <div style={{textAlign:"center",marginBottom:24}}>
           <span style={{fontSize:44}}>🛵</span>
-          <h2 style={{margin:"12px 0 4px",fontSize:18}}>{cadastrado?"Editar empresas atendidas":"Cadastro de Entregador"}</h2>
-          <p style={{color:MUTED,fontSize:13,margin:0}}>Receba notificações só das empresas que você atende</p>
+          <h2 style={{margin:"12px 0 4px",fontSize:18}}>{editandoEmpresas?"Editar empresas atendidas":"Cadastro de Entregador"}</h2>
+          <p style={{color:MUTED,fontSize:13,margin:0}}>
+            {editandoEmpresas?"Receba notificações só das empresas que você atende":"Seu cadastro passará por aprovação da Start Delivery"}
+          </p>
         </div>
 
         <Card style={{marginBottom:16}}>
-          <Input label="📞 Seu telefone" placeholder="(64) 99999-0000" value={telCadastro} onChange={e=>setTelCadastro(e.target.value)}/>
+          <Input label="🧍 Seu nome" placeholder="Como você quer ser identificado" value={nomeCadastro}
+            onChange={e=>setNomeCadastro(e.target.value)} disabled={editandoEmpresas}/>
+          <Input label="📞 Seu telefone" placeholder="(64) 99999-0000" value={telCadastro}
+            onChange={e=>setTelCadastro(e.target.value)} disabled={editandoEmpresas}/>
         </Card>
 
         <Card style={{marginBottom:20}}>
@@ -677,9 +878,9 @@ function PainelEntregador({pedidos,empresas}){
         </Card>
 
         <Btn onClick={concluirCadastro} full size="lg">
-          {cadastrado?"Salvar alterações":"Concluir cadastro 🛵"}
+          {editandoEmpresas?"Salvar alterações":"Enviar cadastro para aprovação 🛵"}
         </Btn>
-        {cadastrado&&(
+        {editandoEmpresas&&(
           <Btn onClick={()=>setEditandoEmpresas(false)} full variant="secondary" style={{marginTop:10}}>Cancelar</Btn>
         )}
       </div>
@@ -692,7 +893,7 @@ function PainelEntregador({pedidos,empresas}){
 
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
         <div>
-          <h2 style={{margin:0,fontSize:18}}>Olá, Entregador! 🛵</h2>
+          <h2 style={{margin:0,fontSize:18}}>Olá, {nomeCadastro||"Entregador"}! 🛵</h2>
           <p style={{margin:"2px 0 0",color:MUTED,fontSize:13}}>Start Delivery · Montividiu/GO</p>
         </div>
         <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
@@ -817,7 +1018,22 @@ function PainelAdmin({pedidos,empresas}){
   const [senha,setSenha]=useState("");
   const [aba,setAba]=useState("dashboard");
   const [nova,setNova]=useState({nome:"",cats:["Restaurante"],emoji:"🏪",whatsapp:"",telefone:"",instagram:"",avaliacao:"5.0",tempoMin:"20",tempoMax:"40"});
+  const [entregadores,setEntregadores]=useState([]);
   const t=useToast();
+
+  async function recarregarEntregadores(){
+    try{
+      const lista=await buscarTodosEntregadores();
+      setEntregadores(lista);
+    }catch(_){}
+  }
+
+  useEffect(()=>{
+    if(!logado) return;
+    recarregarEntregadores();
+    const parar=escutarEntregadores(recarregarEntregadores);
+    return parar;
+  },[logado]);
 
   function login(){if(senha==="start123")setLogado(true);else{t.show("Senha incorreta",RED);}}
   function toggleNovaCat(c){
@@ -857,6 +1073,24 @@ function PainelAdmin({pedidos,empresas}){
       }
     }
   }
+  async function aprovarEntregador(telefone,nome){
+    try{
+      await atualizarStatusEntregador(telefone,"aprovado");
+      t.show(`✅ ${nome} foi aprovado(a)!`);
+    }catch(_){
+      t.show("⚠️ Erro ao aprovar. Tente novamente.",RED);
+    }
+  }
+  async function rejeitarEntregador(telefone,nome){
+    if(window.confirm(`Tem certeza que deseja rejeitar o cadastro de "${nome}"?`)){
+      try{
+        await atualizarStatusEntregador(telefone,"rejeitado");
+        t.show(`🚫 ${nome} foi rejeitado(a).`,RED);
+      }catch(_){
+        t.show("⚠️ Erro ao rejeitar. Tente novamente.",RED);
+      }
+    }
+  }
 
   if(!logado) return(
     <div className="st-screen" style={{maxWidth:360,margin:"4rem auto",padding:"0 1.5rem"}}>
@@ -876,7 +1110,8 @@ function PainelAdmin({pedidos,empresas}){
     </div>
   );
 
-  const abas=[["dashboard","📊 Dashboard"],["empresas","🏪 Empresas"],["pedidos","📦 Pedidos"]];
+  const pendentesCount=entregadores.filter(e=>e.status==="pendente").length;
+  const abas=[["dashboard","📊 Dashboard"],["empresas","🏪 Empresas"],["entregadores",`🛵 Entregadores${pendentesCount>0?` (${pendentesCount})`:""}`],["pedidos","📦 Pedidos"]];
 
   return(
     <div className="st-screen" style={{display:"flex",minHeight:"70vh"}}>
@@ -989,6 +1224,80 @@ function PainelAdmin({pedidos,empresas}){
                 </div>
               </Card>
             ))}
+          </>
+        )}
+
+        {aba==="entregadores"&&(
+          <>
+            <h2 style={{margin:"0 0 8px",fontSize:18}}>Entregadores</h2>
+            <p style={{color:MUTED,fontSize:13,margin:"0 0 20px"}}>Aprove ou rejeite os cadastros para garantir a segurança das entregas.</p>
+
+            {pendentesCount>0&&(
+              <>
+                <p style={{margin:"0 0 12px",fontWeight:600,fontSize:14,color:ORANGE}}>⏳ Aguardando aprovação ({pendentesCount})</p>
+                {entregadores.filter(e=>e.status==="pendente").map(e=>(
+                  <Card key={e.telefone} style={{marginBottom:11,border:`1px solid ${ORANGE}44`}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+                      <div style={{display:"flex",gap:12,alignItems:"center"}}>
+                        <span style={{fontSize:26}}>🧍</span>
+                        <div>
+                          <p style={{margin:0,fontWeight:600,fontSize:14}}>{e.nome||"(sem nome)"}</p>
+                          <p style={{margin:"2px 0 0",color:MUTED,fontSize:12}}>📞 {e.telefone}</p>
+                          <p style={{margin:"2px 0 0",color:MUTED,fontSize:11}}>
+                            Quer atender: {e.empresasIds.map(id=>empresas.find(em=>em.id===id)?.nome).filter(Boolean).join(", ")||"nenhuma selecionada"}
+                          </p>
+                        </div>
+                      </div>
+                      <div style={{display:"flex",gap:8,flexShrink:0}}>
+                        <Btn size="sm" variant="secondary" onClick={()=>rejeitarEntregador(e.telefone,e.nome)}>🚫 Rejeitar</Btn>
+                        <Btn size="sm" variant="green" onClick={()=>aprovarEntregador(e.telefone,e.nome)}>✅ Aprovar</Btn>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </>
+            )}
+
+            <p style={{margin:"24px 0 12px",fontWeight:600,fontSize:14}}>Aprovados</p>
+            {entregadores.filter(e=>e.status==="aprovado").length===0?(
+              <p style={{color:MUTED,fontSize:13}}>Nenhum entregador aprovado ainda.</p>
+            ):entregadores.filter(e=>e.status==="aprovado").map(e=>(
+              <Card key={e.telefone} style={{marginBottom:11}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+                  <div style={{display:"flex",gap:12,alignItems:"center"}}>
+                    <span style={{fontSize:26}}>🛵</span>
+                    <div>
+                      <p style={{margin:0,fontWeight:600,fontSize:14}}>{e.nome||"(sem nome)"}</p>
+                      <p style={{margin:"2px 0 0",color:MUTED,fontSize:12}}>📞 {e.telefone}</p>
+                      <p style={{margin:"2px 0 0",color:MUTED,fontSize:11}}>
+                        Atende: {e.empresasIds.map(id=>empresas.find(em=>em.id===id)?.nome).filter(Boolean).join(", ")||"nenhuma"}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge color={GREEN} text="✅ Aprovado"/>
+                </div>
+              </Card>
+            ))}
+
+            {entregadores.filter(e=>e.status==="rejeitado").length>0&&(
+              <>
+                <p style={{margin:"24px 0 12px",fontWeight:600,fontSize:14,color:MUTED}}>Rejeitados</p>
+                {entregadores.filter(e=>e.status==="rejeitado").map(e=>(
+                  <Card key={e.telefone} style={{marginBottom:11,opacity:0.7}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+                      <div style={{display:"flex",gap:12,alignItems:"center"}}>
+                        <span style={{fontSize:26}}>🚫</span>
+                        <div>
+                          <p style={{margin:0,fontWeight:600,fontSize:14}}>{e.nome||"(sem nome)"}</p>
+                          <p style={{margin:"2px 0 0",color:MUTED,fontSize:12}}>📞 {e.telefone}</p>
+                        </div>
+                      </div>
+                      <Btn size="sm" variant="secondary" onClick={()=>aprovarEntregador(e.telefone,e.nome)}>Aprovar mesmo assim</Btn>
+                    </div>
+                  </Card>
+                ))}
+              </>
+            )}
           </>
         )}
 
@@ -1233,4 +1542,3 @@ export default function App(){
     </div>
   );
 }
-
