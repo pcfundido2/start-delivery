@@ -13,6 +13,7 @@ function empresaDoBanco(row) {
     whatsapp: row.whatsapp,
     telefone: row.telefone,
     instagram: row.instagram,
+    site: row.site || null,
     aberto: row.aberto,
     avaliacao: row.avaliacao,
     tempoMin: row.tempo_min,
