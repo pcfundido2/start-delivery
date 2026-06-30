@@ -232,6 +232,20 @@ function DetalheDrogariaMartins({detalhe,onVoltar,pedirWhatsApp,toast}){
           </button>
         )}
 
+        {detalhe.site&&(
+          <button onClick={()=>window.open(detalhe.site,"_blank")} className="st-fade-in st-contact-btn"
+            style={{width:"100%",display:"flex",alignItems:"center",gap:14,padding:"16px",
+              borderRadius:16,border:"1px solid #7C3AED33",borderLeft:"4px solid #7C3AED",background:BG,
+              cursor:"pointer",marginBottom:18,textAlign:"left",boxShadow:"0 2px 10px rgba(0,0,0,0.05)"}}>
+            <div style={{width:46,height:46,borderRadius:13,background:"#7C3AED",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0,boxShadow:"0 4px 12px #7C3AED55"}}>🌐</div>
+            <div style={{flex:1}}>
+              <p style={{margin:0,fontWeight:700,fontSize:15,color:"#7C3AED"}}>Ver Cardápio / Fazer Pedido</p>
+              <p style={{margin:"3px 0 0",fontSize:12,color:MUTED}}>Acesse o site da empresa</p>
+            </div>
+            <span style={{color:"#7C3AED",fontSize:18,background:"#7C3AED18",borderRadius:99,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center"}}>→</span>
+          </button>
+        )}
+
         {/* selo de pedido seguro */}
         <div style={{display:"flex",alignItems:"center",gap:12,border:"1px dashed #F59E0B66",
           borderRadius:14,padding:"0.9rem 1.1rem",marginTop:6}}>
@@ -357,6 +371,20 @@ function PortalCliente({empresas}){
                 <p style={{margin:"2px 0 0",fontSize:12,color:MUTED}}>@{detalhe.instagram}</p>
               </div>
               <span style={{color:"#E1306C",fontSize:20}}>→</span>
+            </button>
+          )}
+
+          {detalhe.site&&(
+            <button onClick={()=>window.open(detalhe.site,"_blank")} className="st-fade-in st-contact-btn"
+              style={{width:"100%",display:"flex",alignItems:"center",gap:14,padding:"16px",
+                borderRadius:13,border:`1px solid #7C3AED33`,background:"#7C3AED08",
+                cursor:"pointer",marginBottom:12,textAlign:"left"}}>
+              <div style={{width:44,height:44,borderRadius:12,background:"#7C3AED",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0,boxShadow:"0 4px 12px #7C3AED55"}}>🌐</div>
+              <div style={{flex:1}}>
+                <p style={{margin:0,fontWeight:600,fontSize:15,color:"#7C3AED"}}>Ver Cardápio / Fazer Pedido</p>
+                <p style={{margin:"2px 0 0",fontSize:12,color:MUTED}}>Acesse o site da empresa</p>
+              </div>
+              <span style={{color:"#7C3AED",fontSize:20}}>→</span>
             </button>
           )}
         </div>
