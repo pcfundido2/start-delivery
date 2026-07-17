@@ -75,8 +75,12 @@ function pedidoParaBanco(p) {
 // EMPRESAS
 // ════════════════════════════════════════════════════════════════════
 
+// Ordenação pelo campo "ordem" (alfabético), definido pelo SQL de reordenação
 export async function buscarEmpresas() {
-  const { data, error } = await supabase.from('empresas').select('*').order('id');
+  const { data, error } = await supabase
+    .from('empresas')
+    .select('*')
+    .order('ordem', { ascending: true, nullsFirst: false });
   if (error) throw error;
   return data.map(empresaDoBanco);
 }
@@ -159,7 +163,6 @@ export async function buscarEntregadorPorTelefone(telefone) {
   return data ? entregadorDoBanco(data) : null;
 }
 
-// Cadastro novo de entregador: sempre entra como "pendente", aguardando aprovação do admin
 export async function salvarEntregador(telefone, nome, empresasIds) {
   const { error } = await supabase
     .from('entregadores')
@@ -185,15 +188,13 @@ export async function atualizarStatusEntregador(telefone, status) {
 }
 
 // ════════════════════════════════════════════════════════════════════
-// TEMPO REAL — escuta mudanças nos pedidos e chama o callback automaticamente
+// TEMPO REAL
 // ════════════════════════════════════════════════════════════════════
 
 export function escutarPedidos(callback) {
   const canal = supabase
     .channel('pedidos-mudancas')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => {
-      callback();
-    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => callback())
     .subscribe();
   return () => supabase.removeChannel(canal);
 }
@@ -201,9 +202,7 @@ export function escutarPedidos(callback) {
 export function escutarEmpresas(callback) {
   const canal = supabase
     .channel('empresas-mudancas')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'empresas' }, () => {
-      callback();
-    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'empresas' }, () => callback())
     .subscribe();
   return () => supabase.removeChannel(canal);
 }
@@ -211,9 +210,7 @@ export function escutarEmpresas(callback) {
 export function escutarEntregadores(callback) {
   const canal = supabase
     .channel('entregadores-mudancas')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'entregadores' }, () => {
-      callback();
-    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'entregadores' }, () => callback())
     .subscribe();
   return () => supabase.removeChannel(canal);
 }
