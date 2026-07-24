@@ -1051,6 +1051,7 @@ function PainelAdmin({pedidos,empresas}){
   const [aba,setAba]=useState("dashboard");
   const [nova,setNova]=useState({nome:"",cats:["Restaurante"],emoji:"🏪",whatsapp:"",telefone:"",instagram:"",avaliacao:"5.0",tempoMin:"20",tempoMax:"40"});
   const [entregadores,setEntregadores]=useState([]);
+  const [menuAberto,setMenuAberto]=useState(false);
   const t=useToast();
 
   async function recarregarEntregadores(){
@@ -1144,7 +1145,6 @@ function PainelAdmin({pedidos,empresas}){
 
   const pendentesCount=entregadores.filter(e=>e.status==="pendente").length;
   const abas=[["dashboard","📊 Dashboard"],["empresas","🏪 Empresas"],["entregadores",`🛵 Entregadores${pendentesCount>0?` (${pendentesCount})`:""}`],["pedidos","📦 Pedidos"]];
-  const [menuAberto,setMenuAberto]=useState(false);
 
   return(
     <div className="st-screen" style={{display:"flex",minHeight:"70vh",position:"relative"}}>
