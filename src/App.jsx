@@ -1144,70 +1144,81 @@ function PainelAdmin({pedidos,empresas}){
   );
 
   const pendentesCount=entregadores.filter(e=>e.status==="pendente").length;
-  const abas=[["dashboard","📊 Dashboard"],["empresas","🏪 Empresas"],["entregadores",`🛵 Entregadores${pendentesCount>0?` (${pendentesCount})`:""}`],["pedidos","📦 Pedidos"]];
+  const abas=[["dashboard","Dashboard"],["empresas","Empresas"],["entregadores",`Entregadores${pendentesCount>0?` (${pendentesCount})`:""}`],["pedidos","Pedidos"]];
+  const LG_BLUR="blur(20px)";
 
   return(
-    <div className="st-screen" style={{display:"flex",minHeight:"70vh",position:"relative"}}>
+    <div className="st-screen" style={{display:"flex",minHeight:"70vh",position:"relative",
+      background:`linear-gradient(135deg,${ORANGE}15 0%,transparent 50%,${BLUE}10 100%)`}}>
       <Toast msg={t.msg} color={t.color}/>
 
-      {/* overlay escuro quando menu aberto no mobile */}
+      {/* overlay quando menu aberto no mobile */}
       {menuAberto&&(
         <div onClick={()=>setMenuAberto(false)}
-          style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.35)",zIndex:49}}/>
+          style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.32)",zIndex:49,backdropFilter:"blur(2px)"}}/>
       )}
 
-      {/* menu lateral — fixo no mobile, normal no desktop */}
+      {/* menu lateral liquid glass */}
       <div style={{
-          width:200,background:BG2,borderRight:`1px solid ${BORDER}`,padding:"1.5rem 0",
+          width:200,padding:"1.5rem 0",
           flexShrink:0,
-          // mobile: posição fixa, desliza pra dentro/fora
           position:"fixed",top:0,left:0,height:"100vh",zIndex:50,
           transform:menuAberto?"translateX(0)":"translateX(-100%)",
           transition:"transform .28s cubic-bezier(.22,1,.36,1)",
-          // desktop (largura > 640px): sempre visível e dentro do fluxo
-          "@media(min-width:640px)":{position:"relative",transform:"none",height:"auto"},
+          background:"rgba(255,255,255,0.78)",
+          backdropFilter:LG_BLUR,
+          WebkitBackdropFilter:LG_BLUR,
+          borderRight:"1px solid rgba(255,107,26,0.2)",
+          boxShadow:"6px 0 40px rgba(255,107,26,0.12)",
         }}>
-        <div style={{padding:"0 1rem 1.25rem",borderBottom:`1px solid ${BORDER}`,marginBottom:6,
+        <div style={{padding:"0 1rem 1.25rem",borderBottom:"1px solid rgba(255,107,26,0.15)",marginBottom:6,
           display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
-            <p style={{margin:0,fontWeight:700,fontSize:14,color:ORANGE}}>Start Delivery</p>
+            <p style={{margin:0,fontWeight:800,fontSize:15,color:ORANGE,letterSpacing:-0.3}}>Start Delivery</p>
             <p style={{margin:"2px 0 0",color:MUTED,fontSize:11}}>Administração</p>
           </div>
           <button onClick={()=>setMenuAberto(false)}
-            style={{background:"none",border:"none",fontSize:18,cursor:"pointer",color:MUTED,
-              padding:"2px 4px",lineHeight:1}}>✕</button>
+            style={{background:"rgba(255,107,26,0.1)",border:"none",fontSize:15,cursor:"pointer",
+              color:ORANGE,padding:"3px 7px",lineHeight:1,borderRadius:7,fontWeight:700}}>✕</button>
         </div>
         {abas.map(([id,l])=>(
           <button key={id} onClick={()=>{setAba(id);setMenuAberto(false);}} className="st-admin-tab"
             style={{display:"block",width:"100%",textAlign:"left",padding:"12px 1rem",
-              background:aba===id?ORANGE+"22":"transparent",color:aba===id?ORANGE:TEXT,
-              border:"none",borderRight:aba===id?`3px solid ${ORANGE}`:"3px solid transparent",
-              cursor:"pointer",fontSize:14,fontWeight:aba===id?600:400}}>
+              background:aba===id?`${ORANGE}20`:"transparent",
+              color:aba===id?ORANGE:TEXT,
+              border:"none",borderLeft:aba===id?`3px solid ${ORANGE}`:"3px solid transparent",
+              cursor:"pointer",fontSize:14,fontWeight:aba===id?700:400}}>
             {l}
           </button>
         ))}
         <div style={{padding:"1.5rem 1rem 0"}}>
-          <button onClick={()=>setLogado(false)} style={{background:"none",border:"none",color:MUTED,fontSize:12,cursor:"pointer"}}>← Sair</button>
+          <button onClick={()=>setLogado(false)}
+            style={{background:"none",border:"none",color:MUTED,fontSize:12,cursor:"pointer"}}>← Sair</button>
         </div>
       </div>
 
       {/* conteúdo principal */}
       <div style={{flex:1,minWidth:0,display:"flex",flexDirection:"column"}}>
-        {/* topbar com botão hamburguer */}
+        {/* topbar liquid glass */}
         <div style={{display:"flex",alignItems:"center",gap:12,padding:"0.9rem 1.25rem",
-          borderBottom:`1px solid ${BORDER}`,background:BG,position:"sticky",top:0,zIndex:10}}>
+          background:"rgba(255,255,255,0.72)",
+          backdropFilter:LG_BLUR,WebkitBackdropFilter:LG_BLUR,
+          borderBottom:"1px solid rgba(255,107,26,0.13)",
+          boxShadow:"0 2px 20px rgba(255,107,26,0.08)",
+          position:"sticky",top:0,zIndex:10}}>
           <button onClick={()=>setMenuAberto(o=>!o)}
-            style={{background:"none",border:`1px solid ${BORDER}`,borderRadius:8,
-              padding:"6px 10px",cursor:"pointer",fontSize:16,lineHeight:1,color:TEXT}}>
+            style={{background:"rgba(255,107,26,0.12)",border:`1px solid ${ORANGE}33`,borderRadius:9,
+              padding:"6px 12px",cursor:"pointer",fontSize:16,lineHeight:1,color:ORANGE,fontWeight:700}}>
             ☰
           </button>
-          <p style={{margin:0,fontWeight:600,fontSize:14,color:ORANGE}}>
+          <p style={{margin:0,fontWeight:700,fontSize:15,color:ORANGE}}>
             {abas.find(([id])=>id===aba)?.[1]||"Admin"}
           </p>
           {pendentesCount>0&&aba!=="entregadores"&&(
             <button onClick={()=>{setAba("entregadores");setMenuAberto(false);}}
               style={{marginLeft:"auto",background:RED,color:"#fff",border:"none",
-                borderRadius:99,fontSize:11,fontWeight:700,padding:"3px 10px",cursor:"pointer"}}>
+                borderRadius:99,fontSize:11,fontWeight:700,padding:"4px 12px",cursor:"pointer",
+                boxShadow:`0 2px 8px ${RED}44`}}>
               {pendentesCount} pendente{pendentesCount>1?"s":""}
             </button>
           )}
@@ -1352,7 +1363,10 @@ function PainelAdmin({pedidos,empresas}){
                       </p>
                     </div>
                   </div>
-                  <Badge color={GREEN} text="✅ Aprovado"/>
+                  <div style={{display:"flex",gap:8,alignItems:"center",flexShrink:0}}>
+                    <Badge color={GREEN} text="✅ Aprovado"/>
+                    <Btn size="sm" variant="danger" onClick={()=>rejeitarEntregador(e.telefone,e.nome)}>Desaprovar</Btn>
+                  </div>
                 </div>
               </Card>
             ))}
