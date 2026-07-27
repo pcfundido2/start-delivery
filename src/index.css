@@ -1,29 +1,66 @@
+/* ══════════════════════════════════════════════════════════════
+   START DELIVERY — Estilos globais
+   Paleta: Laranja Premium + Dourado + Azul Noite + Creme
+   Fontes: Playfair Display (títulos) + Lato (corpo)
+══════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Lato:wght@300;400;500;700&display=swap');
+
 :root {
-  --color-background-primary: #ffffff;
-  --color-background-secondary: #f7f7f8;
-  --color-border-tertiary: #e5e5e7;
-  --color-text-primary: #1a1a1a;
-  --color-text-secondary: #6b6b6f;
-  --color-text-tertiary: #9a9a9e;
+  /* Fundo creme quente (não branco puro — mais elegante) */
+  --color-background-primary: #FFFBF5;
+  --color-background-secondary: #F5EFE6;
+
+  /* Bordas suaves com tom dourado */
+  --color-border-tertiary: #E8D8C0;
+
+  /* Texto azul noite (mais sofisticado que preto puro) */
+  --color-text-primary: #1A1A2E;
+  --color-text-secondary: #6B6358;
+  --color-text-tertiary: #A89880;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-background-primary: #1a1a1a;
-    --color-background-secondary: #252527;
-    --color-border-tertiary: #3a3a3d;
-    --color-text-primary: #f5f5f5;
-    --color-text-secondary: #b0b0b3;
-    --color-text-tertiary: #7a7a7d;
+    --color-background-primary: #1A1A2E;
+    --color-background-secondary: #22223A;
+    --color-border-tertiary: #2E2E4A;
+    --color-text-primary: #F5EFE6;
+    --color-text-secondary: #A89880;
+    --color-text-tertiary: #6B6358;
   }
 }
 
 * {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 body {
+  font-family: 'Lato', system-ui, sans-serif;
   background: var(--color-background-primary);
+  color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Scrollbar elegante */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #D4A01755;
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #D4A017AA;
 }
