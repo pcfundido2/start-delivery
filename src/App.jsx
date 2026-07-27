@@ -8,9 +8,14 @@ import {
   escutarPedidos, escutarEmpresas, escutarEntregadores,
 } from "./data";
 
-const ORANGE="#FF6B1A", ORANGE_DEEP="#E85D04", GREEN="#10B981", RED="#EF4444", BLUE="#3B82F6";
+const ORANGE="#FF6B1A", ORANGE_DEEP="#E85D04";
+const GOLD="#D4A017", GOLD_LIGHT="#F0C84A";
+const GREEN="#059669", RED="#EF4444", BLUE="#1A1A2E";
+const NIGHT="#1A1A2E", CREAM="#FFFBF5";
 const BORDER="var(--color-border-tertiary)", TEXT="var(--color-text-primary)";
 const MUTED="var(--color-text-secondary)", BG="var(--color-background-primary)", BG2="var(--color-background-secondary)";
+const FONT_TITLE="'Playfair Display', Georgia, serif";
+const FONT_BODY="'Lato', system-ui, sans-serif";
 
 function playPlim(freq=880){
   try{
@@ -152,7 +157,7 @@ function DetalheDrogariaMartins({detalhe,onVoltar,pedirWhatsApp,toast}){
             {detalhe.emoji||"💊"}
           </div>
           <div>
-            <h2 style={{margin:0,color:"#fff",fontSize:23,fontWeight:800}}>{detalhe.nome}</h2>
+            <h2 style={{fontFamily:FONT_TITLE,margin:0,color:"#fff",fontSize:23,fontWeight:800}}>{detalhe.nome}</h2>
             <p style={{margin:"4px 0 0",color:"#FCD34D",fontSize:14,fontWeight:700}}>Farmácia</p>
             <div style={{display:"flex",gap:12,marginTop:7,alignItems:"center"}}>
               <span style={{display:"flex",alignItems:"center",gap:4,color:"#FCD34D",fontSize:13,fontWeight:600}}>
@@ -294,7 +299,9 @@ function PortalCliente({empresas}){
     return(
       <div className="st-screen" style={{maxWidth:480,margin:"0 auto",paddingBottom:"2rem"}}>
         <Toast msg={t.msg} color={t.color}/>
-        <div style={{background:`linear-gradient(135deg, ${ORANGE} 0%, ${ORANGE_DEEP} 100%)`,padding:"1.5rem"}}>
+        <div style={{background:`linear-gradient(135deg, ${ORANGE} 0%, ${ORANGE_DEEP} 60%, ${NIGHT} 100%)`,padding:"1.5rem",position:"relative",overflow:"hidden"}}>
+          <div style={{position:"absolute",top:-20,right:-20,width:90,height:90,borderRadius:"50%",
+            background:`radial-gradient(circle, ${GOLD}33 0%, transparent 70%)`,pointerEvents:"none"}}/>
           <button onClick={()=>setDetalhe(null)} className="st-back-btn"
             style={{background:"rgba(255,255,255,0.18)",border:"none",color:"#fff",borderRadius:9,
               padding:"6px 14px",fontSize:13,cursor:"pointer",marginBottom:14,fontWeight:500}}>
@@ -307,7 +314,7 @@ function PortalCliente({empresas}){
               {detalhe.emoji}
             </div>
             <div>
-              <h2 style={{margin:0,color:"#fff",fontSize:20,fontWeight:700}}>{detalhe.nome}</h2>
+              <h2 style={{fontFamily:FONT_TITLE,margin:0,color:"#fff",fontSize:20,fontWeight:700}}>{detalhe.nome}</h2>
               <p style={{margin:"3px 0 0",color:"rgba(255,255,255,0.85)",fontSize:13}}>{detalhe.cats.join(" · ")}</p>
               <div style={{display:"flex",gap:14,marginTop:5,alignItems:"center"}}>
                 <StarRating val={detalhe.avaliacao||0}/>
@@ -396,10 +403,14 @@ function PortalCliente({empresas}){
   return(
     <div className="st-screen" style={{maxWidth:540,margin:"0 auto",paddingBottom:"2rem"}}>
       <Toast msg={t.msg} color={t.color}/>
-      <div style={{background:`linear-gradient(135deg, ${ORANGE} 0%, ${ORANGE_DEEP} 100%)`,padding:"1.75rem 1.5rem 2rem"}}>
+      <div style={{background:`linear-gradient(135deg, ${ORANGE} 0%, ${ORANGE_DEEP} 60%, ${NIGHT} 100%)`,padding:"1.75rem 1.5rem 2rem",position:"relative",overflow:"hidden"}}>
+        {/* detalhe dourado decorativo */}
+        <div style={{position:"absolute",top:-30,right:-30,width:120,height:120,borderRadius:"50%",
+          background:`radial-gradient(circle, ${GOLD}33 0%, transparent 70%)`,pointerEvents:"none"}}/>
         <img src={LOGO_START} alt="Start Delivery" style={{height:44,marginBottom:10,filter:"brightness(0) invert(1)"}}/>
-        <p style={{margin:"0 0 2px",color:"rgba(255,255,255,0.82)",fontSize:13}}>Bem-vindo à</p>
-        <h1 style={{margin:"0 0 16px",color:"#fff",fontSize:22,fontWeight:700,letterSpacing:-0.5}}>Start Delivery</h1>
+        <p style={{margin:"0 0 2px",color:"rgba(255,255,255,0.75)",fontSize:12,fontFamily:FONT_BODY,letterSpacing:2,textTransform:"uppercase"}}>Bem-vindo à</p>
+        <h1 style={{fontFamily:FONT_TITLE,margin:"0 0 4px",color:"#fff",fontSize:26,fontWeight:700,letterSpacing:-0.5}}>Start Delivery</h1>
+        <p style={{margin:"0 0 18px",color:GOLD_LIGHT,fontSize:11,fontFamily:FONT_BODY,letterSpacing:2.5,textTransform:"uppercase",fontWeight:700}}>✦ Montividiu · GO ✦</p>
         <div style={{position:"relative"}}>
           <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:15}}>🔍</span>
           <input placeholder="Buscar estabelecimentos..." value={busca} onChange={e=>setBusca(e.target.value)}
@@ -459,8 +470,9 @@ function PortalCliente({empresas}){
             <p style={{fontSize:14}}>Nenhum estabelecimento encontrado</p>
           </div>
         )}
-        <div style={{marginTop:"1.5rem",borderTop:`1px solid ${BORDER}`,paddingTop:"1rem",textAlign:"center"}}>
-          <p style={{margin:0,color:MUTED,fontSize:12}}>Start Delivery - C&E digital · Montividiu/GO</p>
+        <div style={{marginTop:"1.5rem",borderTop:`1px solid ${GOLD}33`,paddingTop:"1rem",textAlign:"center"}}>
+          <p style={{margin:"0 0 2px",color:GOLD,fontSize:11,fontFamily:FONT_BODY,letterSpacing:2,textTransform:"uppercase",fontWeight:700}}>✦ Start Delivery ✦</p>
+          <p style={{margin:0,color:MUTED,fontSize:11,fontFamily:FONT_BODY}}>C&E digital · Montividiu/GO</p>
         </div>
       </div>
     </div>
@@ -566,7 +578,7 @@ function PainelEmpresa({pedidos,empresas}){
         <Toast msg={t.msg} color={t.color}/>
         <div style={{textAlign:"center",marginBottom:28}}>
           <span style={{fontSize:44}}>🏪</span>
-          <h2 style={{margin:"12px 0 4px",fontSize:18}}>Painel da Empresa</h2>
+          <h2 style={{fontFamily:FONT_TITLE,margin:"12px 0 4px",fontSize:18}}>Painel da Empresa</h2>
           <p style={{color:MUTED,fontSize:13,margin:0}}>Entre com o telefone cadastrado da sua empresa</p>
         </div>
         <Card style={{border:`1px solid ${ORANGE}44`}}>
@@ -604,7 +616,7 @@ function PainelEmpresa({pedidos,empresas}){
         <div style={{display:"flex",gap:12,alignItems:"center"}}>
           <span style={{fontSize:32}}>{empresa.emoji}</span>
           <div>
-            <h2 style={{margin:0,fontSize:17}}>{empresa.nome}</h2>
+            <h2 style={{fontFamily:FONT_TITLE,margin:0,fontSize:17}}>{empresa.nome}</h2>
             <p style={{margin:"2px 0 0",color:MUTED,fontSize:12}}>Painel de Pedidos</p>
           </div>
         </div>
@@ -834,7 +846,7 @@ function PainelEntregador({pedidos,empresas}){
       <div className="st-screen" style={{maxWidth:420,margin:"0 auto",padding:"3rem 1.5rem",textAlign:"center"}}>
         <Toast msg={t.msg} color={t.color}/>
         <span style={{fontSize:52}}>⏳</span>
-        <h2 style={{margin:"16px 0 6px",fontSize:18}}>Cadastro em análise</h2>
+        <h2 style={{fontFamily:FONT_TITLE,margin:"16px 0 6px",fontSize:18}}>Cadastro em análise</h2>
         <p style={{color:MUTED,fontSize:13,lineHeight:1.6,margin:"0 0 20px"}}>
           Olá, <strong style={{color:TEXT}}>{nomeCadastro}</strong>! Seu cadastro foi enviado e está aguardando aprovação da Start Delivery.<br/><br/>
           Isso é feito para garantir a segurança das entregas. Assim que for aprovado, você já poderá ver as corridas disponíveis aqui mesmo.
@@ -853,7 +865,7 @@ function PainelEntregador({pedidos,empresas}){
       <div className="st-screen" style={{maxWidth:420,margin:"0 auto",padding:"3rem 1.5rem",textAlign:"center"}}>
         <Toast msg={t.msg} color={t.color}/>
         <span style={{fontSize:52}}>🚫</span>
-        <h2 style={{margin:"16px 0 6px",fontSize:18,color:RED}}>Cadastro não aprovado</h2>
+        <h2 style={{fontFamily:FONT_TITLE,margin:"16px 0 6px",fontSize:18,color:RED}}>Cadastro não aprovado</h2>
         <p style={{color:MUTED,fontSize:13,lineHeight:1.6,margin:"0 0 20px"}}>
           Seu cadastro como entregador não foi aprovado pela Start Delivery.<br/><br/>
           Se você acredita que isso é um engano, entre em contato com a administração.
@@ -869,7 +881,7 @@ function PainelEntregador({pedidos,empresas}){
         <Toast msg={t.msg} color={t.color}/>
         <div style={{textAlign:"center",marginBottom:24}}>
           <span style={{fontSize:44}}>🛵</span>
-          <h2 style={{margin:"12px 0 4px",fontSize:18}}>{editandoEmpresas?"Editar empresas atendidas":"Cadastro de Entregador"}</h2>
+          <h2 style={{fontFamily:FONT_TITLE,margin:"12px 0 4px",fontSize:18}}>{editandoEmpresas?"Editar empresas atendidas":"Cadastro de Entregador"}</h2>
           <p style={{color:MUTED,fontSize:13,margin:0}}>
             {editandoEmpresas?"Receba notificações só das empresas que você atende":"Seu cadastro passará por aprovação da Start Delivery"}
           </p>
@@ -925,7 +937,7 @@ function PainelEntregador({pedidos,empresas}){
 
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
         <div>
-          <h2 style={{margin:0,fontSize:18}}>Olá, {nomeCadastro||"Entregador"}! 🛵</h2>
+          <h2 style={{fontFamily:FONT_TITLE,margin:0,fontSize:18}}>Olá, {nomeCadastro||"Entregador"}! 🛵</h2>
           <p style={{margin:"2px 0 0",color:MUTED,fontSize:13}}>Start Delivery · Montividiu/GO</p>
         </div>
         <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
@@ -1130,7 +1142,7 @@ function PainelAdmin({pedidos,empresas}){
       <Toast msg={t.msg} color={t.color}/>
       <div style={{textAlign:"center",marginBottom:28}}>
         <span style={{fontSize:40}}>🔐</span>
-        <h2 style={{margin:"12px 0 4px",fontSize:18}}>Área Administrativa</h2>
+        <h2 style={{fontFamily:FONT_TITLE,margin:"12px 0 4px",fontSize:18}}>Área Administrativa</h2>
         <p style={{color:MUTED,fontSize:13,margin:0}}>Acesso restrito · Start Delivery</p>
       </div>
       <Card>
@@ -1227,7 +1239,7 @@ function PainelAdmin({pedidos,empresas}){
         <div className="st-fade-in" style={{flex:1,padding:"1.25rem",overflow:"auto"}} key={aba}>
         {aba==="dashboard"&&(
           <>
-            <h2 style={{margin:"0 0 20px",fontSize:18}}>Dashboard</h2>
+            <h2 style={{fontFamily:FONT_TITLE,margin:"0 0 20px",fontSize:18}}>Dashboard</h2>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:12,marginBottom:28}}>
               {[[pedidos.length,"📦",ORANGE,"Total pedidos"],[empresas.filter(e=>e.aberto).length,"🏪",GREEN,"Empresas ativas"],[pedidos.filter(p=>p.status==="em_rota").length,"🛵",BLUE,"Em rota"],[pedidos.filter(p=>p.status==="entregue").length,"✅",GREEN,"Entregues"]].map(([v,i,c,l])=>(
                 <div key={l} className="st-stat-box" style={{background:BG2,borderRadius:12,padding:"1rem",textAlign:"center",border:`1px solid ${c}22`}}>
@@ -1237,7 +1249,7 @@ function PainelAdmin({pedidos,empresas}){
                 </div>
               ))}
             </div>
-            <h3 style={{margin:"0 0 14px",fontSize:14}}>Pedidos recentes</h3>
+            <h3 style={{fontFamily:FONT_TITLE,margin:"0 0 14px",fontSize:14}}>Pedidos recentes</h3>
             {pedidos.length===0?<p style={{color:MUTED,fontSize:13}}>Nenhum pedido ainda.</p>:pedidos.slice(0,8).map((p,i)=>(
               <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",
                 padding:"10px 0",borderBottom:`1px solid ${BORDER}`,fontSize:12,gap:8,flexWrap:"wrap"}}>
@@ -1255,7 +1267,7 @@ function PainelAdmin({pedidos,empresas}){
 
         {aba==="empresas"&&(
           <>
-            <h2 style={{margin:"0 0 20px",fontSize:18}}>Empresas Parceiras</h2>
+            <h2 style={{fontFamily:FONT_TITLE,margin:"0 0 20px",fontSize:18}}>Empresas Parceiras</h2>
             <Card style={{marginBottom:20}}>
               <p style={{fontWeight:600,margin:"0 0 14px",fontSize:14}}>Cadastrar nova empresa</p>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
@@ -1318,7 +1330,7 @@ function PainelAdmin({pedidos,empresas}){
 
         {aba==="entregadores"&&(
           <>
-            <h2 style={{margin:"0 0 8px",fontSize:18}}>Entregadores</h2>
+            <h2 style={{fontFamily:FONT_TITLE,margin:"0 0 8px",fontSize:18}}>Entregadores</h2>
             <p style={{color:MUTED,fontSize:13,margin:"0 0 20px"}}>Aprove ou rejeite os cadastros para garantir a segurança das entregas.</p>
 
             {pendentesCount>0&&(
@@ -1395,7 +1407,7 @@ function PainelAdmin({pedidos,empresas}){
 
         {aba==="pedidos"&&(
           <>
-            <h2 style={{margin:"0 0 8px",fontSize:18}}>Todos os Pedidos</h2>
+            <h2 style={{fontFamily:FONT_TITLE,margin:"0 0 8px",fontSize:18}}>Todos os Pedidos</h2>
             <p style={{color:MUTED,fontSize:13,margin:"0 0 20px"}}>Visão geral de todos os pedidos da plataforma.</p>
             {pedidos.length===0
               ?<Card><p style={{textAlign:"center",color:MUTED,padding:"1.5rem",fontSize:13}}>Nenhum pedido ainda.</p></Card>
@@ -1438,7 +1450,7 @@ function QRCodeView(){
   return(
     <div className="st-screen" style={{maxWidth:480,margin:"0 auto",padding:"1.75rem 1.5rem"}}>
       <div style={{textAlign:"center",marginBottom:24}}>
-        <h2 style={{margin:"0 0 6px",fontSize:18}}>QR Code de Divulgação</h2>
+        <h2 style={{fontFamily:FONT_TITLE,margin:"0 0 6px",fontSize:18}}>QR Code de Divulgação</h2>
         <p style={{color:MUTED,fontSize:13,margin:0}}>Gere e imprima para instalar em estabelecimentos parceiros</p>
       </div>
       <Card style={{marginBottom:16}}>
@@ -1515,14 +1527,14 @@ export default function App(){
 
   if(carregandoApp){
     return(
-      <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"system-ui,-apple-system,sans-serif"}}>
+      <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FONT_BODY}}>
         <p style={{color:MUTED,fontSize:14}}>Carregando Start Delivery...</p>
       </div>
     );
   }
 
   return(
-    <div style={{fontFamily:"system-ui,-apple-system,sans-serif",color:TEXT,minHeight:"100vh"}}>
+    <div style={{fontFamily:FONT_BODY,color:TEXT,minHeight:"100vh"}}>
       <style>{`
         *{box-sizing:border-box}
         input::placeholder{color:var(--color-text-tertiary,#999)!important}
