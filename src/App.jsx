@@ -267,14 +267,32 @@ function DetalheDrogariaMartins({detalhe,onVoltar,pedirWhatsApp,toast}){
   );
 }
 
-// ════════════════════════════════════════════════════════════════════
-// 1. PORTAL DO CLIENTE
-// ════════════════════════════════════════════════════════════════════
-function PortalCliente({empresas}){
+// ícones por categoria para o grid desktop
+const CAT_ICONS={"Restaurante":"🍽️","Doceria":"🍰","Mercearia":"🛒","Farmácia":"💊","Cosméticos":"💄","Variados":"🛍️","Todos":"◉"};
+
+// cores de fundo por categoria para os cards desktop
+function catColor(cats){
+  const c=cats[0]||"";
+  if(c==="Doceria") return {bg:"#FFF3E0",ico:"#FF8C00"};
+  if(c==="Mercearia") return {bg:"#E8F5E9",ico:"#2E7D32"};
+  if(c==="Farmácia") return {bg:"#FFEBEE",ico:"#C62828"};
+  if(c==="Cosméticos") return {bg:"#F3E5F5",ico:"#6A1B9A"};
+  if(c==="Variados") return {bg:"#E3F2FD",ico:"#1565C0"};
+  return {bg:"#FFF8E1",ico:"#E65100"};
+}
+
+function PortalCliente({empresas,tela,setTela}){
   const [cat,setCat]=useState("Todos");
   const [busca,setBusca]=useState("");
   const [detalhe,setDetalhe]=useState(null);
+  const [isDesktop,setIsDesktop]=useState(window.innerWidth>=768);
   const t=useToast();
+
+  useEffect(()=>{
+    const fn=()=>setIsDesktop(window.innerWidth>=768);
+    window.addEventListener("resize",fn);
+    return ()=>window.removeEventListener("resize",fn);
+  },[]);
 
   const lista=empresas.filter(e=>
     (cat==="Todos"||e.cats.includes(cat))&&
@@ -290,7 +308,7 @@ function PortalCliente({empresas}){
     t.show(`✅ WhatsApp de ${empresa.nome} aberto!`);
   }
 
-  // tela de contatos
+  // ── tela de detalhe (igual em desktop e mobile) ───────────────────
   if(detalhe){
     const isDrogariaMartins = detalhe.nome === "Drogaria Martins";
     if(isDrogariaMartins){
@@ -323,7 +341,6 @@ function PortalCliente({empresas}){
             </div>
           </div>
         </div>
-
         {detalhe.obs&&(
           <div className="st-fade-in" style={{margin:"1.25rem 1.25rem 0",background:RED+"12",border:`1px solid ${RED}44`,borderRadius:11,padding:"0.9rem 1rem"}}>
             <p style={{margin:0,fontWeight:600,fontSize:13,color:RED}}>{detalhe.obs}</p>
@@ -335,10 +352,8 @@ function PortalCliente({empresas}){
             Escolha como quer entrar em contato com <strong>{detalhe.nome}</strong>. A empresa vai combinar os detalhes do seu pedido com você!
           </p>
         </div>
-
         <div style={{padding:"1.25rem"}}>
           <p style={{margin:"0 0 14px",fontWeight:600,fontSize:14}}>Formas de contato:</p>
-
           {detalhe.whatsapp&&(
             <button onClick={()=>pedirWhatsApp(detalhe)} className="st-fade-in st-contact-btn"
               style={{width:"100%",display:"flex",alignItems:"center",gap:14,padding:"16px",
@@ -352,7 +367,6 @@ function PortalCliente({empresas}){
               <span style={{color:"#25D366",fontSize:20}}>→</span>
             </button>
           )}
-
           {detalhe.telefone&&(
             <button onClick={()=>window.open(`tel:${detalhe.telefone.replace(/\D/g,"")}`)} className="st-fade-in st-contact-btn"
               style={{width:"100%",display:"flex",alignItems:"center",gap:14,padding:"16px",
@@ -366,7 +380,6 @@ function PortalCliente({empresas}){
               <span style={{color:MUTED,fontSize:20}}>→</span>
             </button>
           )}
-
           {detalhe.instagram&&(
             <button onClick={()=>window.open(`https://instagram.com/${detalhe.instagram}`,"_blank")} className="st-fade-in st-contact-btn"
               style={{width:"100%",display:"flex",alignItems:"center",gap:14,padding:"16px",
@@ -380,7 +393,6 @@ function PortalCliente({empresas}){
               <span style={{color:"#E1306C",fontSize:20}}>→</span>
             </button>
           )}
-
           {detalhe.site&&(
             <button onClick={()=>window.open(detalhe.site,"_blank")} className="st-fade-in st-contact-btn"
               style={{width:"100%",display:"flex",alignItems:"center",gap:14,padding:"16px",
@@ -399,12 +411,208 @@ function PortalCliente({empresas}){
     );
   }
 
-  // lista de empresas
+  // ══════════════════════════════════════════════════════════════════
+  // DESKTOP — layout premium igual ao print
+  // ══════════════════════════════════════════════════════════════════
+  if(isDesktop){
+    return(
+      <div className="st-screen" style={{minHeight:"100vh",background:"#0D0D0D",color:"#F5F5F5"}}>
+        <Toast msg={t.msg} color={t.color}/>
+
+        {/* ── nav desktop ── */}
+        <div style={{
+          position:"sticky",top:0,zIndex:100,
+          background:"rgba(13,13,13,0.94)",
+          backdropFilter:"blur(16px)",
+          borderBottom:"1px solid rgba(255,255,255,0.07)"}}>
+          <div style={{maxWidth:1200,margin:"0 auto",display:"flex",alignItems:"center",
+            padding:"0 4rem",height:58,gap:32}}>
+            <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
+              <img src={LOGO_START} alt="" style={{height:30,filter:"invert(60%) sepia(1) saturate(5) hue-rotate(10deg)"}}/>
+              <span style={{color:ORANGE,fontWeight:800,fontSize:17,fontFamily:FONT_BODY,letterSpacing:-0.3}}>Start Delivery</span>
+            </div>
+            <div style={{display:"flex",gap:4}}>
+              {[["cliente","🛍️","Pedir"],["empresa","🏪","Empresa"],["entregador","🛵","Entregador"],["admin","🔐","Admin"]].map(([id,icon,label])=>(
+                <button key={id} onClick={()=>setTela(id)}
+                  style={{display:"flex",alignItems:"center",gap:7,
+                    padding:"8px 16px",
+                    background:tela===id?`linear-gradient(135deg,${ORANGE},${ORANGE_DEEP})`:"transparent",
+                    border:tela===id?"none":`1px solid transparent`,
+                    borderRadius:9,cursor:"pointer",fontSize:13,
+                    color:tela===id?"#fff":"rgba(255,255,255,0.55)",
+                    fontWeight:tela===id?700:400,fontFamily:FONT_BODY,
+                    boxShadow:tela===id?`0 4px 12px ${ORANGE}44`:"none",
+                    transition:"all .18s ease"}}>
+                  <span>{icon}</span>
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── hero section ── */}
+        <div style={{
+          background:`linear-gradient(135deg, #1A0A00 0%, #2D1200 40%, #1A1A2E 100%)`,
+          padding:"3.5rem 4rem 3rem",position:"relative",overflow:"hidden",
+          borderBottom:"1px solid rgba(212,160,23,0.2)"}}>
+          {/* brilho dourado de fundo */}
+          <div style={{position:"absolute",top:"-40%",left:"20%",width:500,height:400,
+            background:`radial-gradient(ellipse, ${ORANGE}30 0%, transparent 65%)`,
+            pointerEvents:"none",filter:"blur(40px)"}}/>
+          <div style={{position:"relative",zIndex:1,maxWidth:1200,margin:"0 auto"}}>
+            <p style={{margin:"0 0 6px",color:GOLD_LIGHT,fontSize:12,letterSpacing:3,
+              textTransform:"uppercase",fontWeight:700,fontFamily:FONT_BODY}}>
+              BEM-VINDO(A) À
+            </p>
+            <h1 style={{fontFamily:FONT_TITLE,margin:"0 0 6px",color:"#fff",fontSize:52,
+              fontWeight:800,letterSpacing:-1,lineHeight:1.1}}>
+              Start Delivery
+            </h1>
+            <p style={{margin:"0 0 2.5rem",color:GOLD_LIGHT,fontSize:13,letterSpacing:3,
+              textTransform:"uppercase",fontWeight:700,fontFamily:FONT_BODY}}>
+              ✦ MONTIVIDIU · GO ✦
+            </p>
+            {/* barra de busca */}
+            <div style={{position:"relative",maxWidth:680}}>
+              <span style={{position:"absolute",left:18,top:"50%",transform:"translateY(-50%)",
+                fontSize:18,color:"rgba(255,255,255,0.45)"}}>🔍</span>
+              <input
+                placeholder="Buscar estabelecimentos, comidas, bebidas..."
+                value={busca} onChange={e=>setBusca(e.target.value)}
+                style={{width:"100%",padding:"16px 18px 16px 52px",borderRadius:14,
+                  border:"1px solid rgba(255,255,255,0.12)",
+                  background:"rgba(255,255,255,0.08)",
+                  backdropFilter:"blur(12px)",
+                  color:"#fff",fontSize:15,boxSizing:"border-box",outline:"none",
+                  fontFamily:FONT_BODY}}/>
+            </div>
+          </div>
+        </div>
+
+        {/* ── filtros de categoria ── */}
+        <div style={{background:"#141414",borderBottom:"1px solid rgba(255,255,255,0.07)",
+          padding:"0 4rem",position:"sticky",top:0,zIndex:20}}>
+          <div style={{maxWidth:1200,margin:"0 auto",display:"flex",gap:4,overflowX:"auto",
+            padding:"0.85rem 0"}} className="st-cat-scroll">
+            {CATS.map(c=>{
+              const sel=cat===c;
+              return(
+                <button key={c} onClick={()=>setCat(c)}
+                  style={{flexShrink:0,display:"flex",alignItems:"center",gap:7,
+                    padding:"9px 18px",borderRadius:10,cursor:"pointer",
+                    border:sel?`1px solid ${ORANGE}88`:"1px solid rgba(255,255,255,0.1)",
+                    background:sel?`linear-gradient(135deg,${ORANGE},${ORANGE_DEEP})`:"transparent",
+                    color:sel?"#fff":"rgba(255,255,255,0.65)",
+                    fontSize:13,fontWeight:sel?700:400,fontFamily:FONT_BODY,
+                    transition:"all .18s ease"}}>
+                  <span>{CAT_ICONS[c]||"◉"}</span>
+                  {c}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── conteúdo principal ── */}
+        <div style={{maxWidth:1200,margin:"0 auto",padding:"2rem 4rem 4rem"}}>
+          {/* cabeçalho da lista */}
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.5rem"}}>
+            <p style={{margin:0,color:"rgba(255,255,255,0.75)",fontSize:14,fontFamily:FONT_BODY}}>
+              🏪 <strong style={{color:"#fff"}}>{lista.length}</strong> estabelecimento{lista.length!==1?"s":""} encontrado{lista.length!==1?"s":""}
+            </p>
+          </div>
+
+          {/* grid de cards */}
+          {lista.length===0?(
+            <div style={{textAlign:"center",padding:"5rem 1rem",color:"rgba(255,255,255,0.4)"}}>
+              <p style={{fontSize:48,margin:"0 0 12px"}}>🔍</p>
+              <p style={{fontSize:16,fontFamily:FONT_BODY}}>Nenhum estabelecimento encontrado</p>
+            </div>
+          ):(
+            <div style={{display:"grid",
+              gridTemplateColumns:"repeat(auto-fill,minmax(230px,1fr))",
+              gap:"1.25rem"}}>
+              {lista.map(e=>{
+                const {bg,ico}=catColor(e.cats);
+                return(
+                  <button key={e.id}
+                    onClick={()=>{
+                      if(!e.aberto) return;
+                      if(e.site) window.open(e.site,"_blank");
+                      else setDetalhe(e);
+                    }}
+                    className="st-desk-card"
+                    style={{textAlign:"left",background:"#1C1C1C",border:"1px solid rgba(255,255,255,0.08)",
+                      borderRadius:16,padding:0,cursor:e.aberto?"pointer":"not-allowed",
+                      opacity:e.aberto?1:0.5,overflow:"hidden",display:"flex",flexDirection:"column"}}>
+                    {/* ícone colorido */}
+                    <div style={{background:bg,height:100,display:"flex",alignItems:"center",
+                      justifyContent:"center",fontSize:44,position:"relative"}}>
+                      {e.emoji}
+                      {e.aberto&&(
+                        <span style={{position:"absolute",top:10,left:10,
+                          background:"#00C853",color:"#fff",fontSize:10,fontWeight:700,
+                          padding:"2px 9px",borderRadius:99,letterSpacing:0.5,fontFamily:FONT_BODY}}>
+                          Aberto
+                        </span>
+                      )}
+                    </div>
+                    {/* info */}
+                    <div style={{padding:"14px 14px 16px",flex:1,display:"flex",flexDirection:"column",gap:4}}>
+                      <p style={{margin:0,fontWeight:700,fontSize:15,color:"#F5F5F5",fontFamily:FONT_BODY,lineHeight:1.3}}>
+                        {e.nome}
+                      </p>
+                      <p style={{margin:0,fontSize:12,color:"rgba(255,255,255,0.45)",fontFamily:FONT_BODY}}>
+                        {e.cats.join(" · ")}
+                      </p>
+                      {e.obs&&<p style={{margin:0,fontSize:11,color:RED,fontWeight:500,fontFamily:FONT_BODY}}>{e.obs}</p>}
+                      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:"auto",paddingTop:8}}>
+                        <div style={{display:"flex",alignItems:"center",gap:6,fontSize:12,color:"rgba(255,255,255,0.55)",fontFamily:FONT_BODY}}>
+                          {e.avaliacao&&<span style={{color:"#F59E0B"}}>★ {e.avaliacao.toFixed(1)}</span>}
+                          {e.tempoMin&&<span>· {e.tempoMin}–{e.tempoMax} min</span>}
+                        </div>
+                        <div style={{width:32,height:32,borderRadius:99,
+                          background:`linear-gradient(135deg,${ORANGE},${ORANGE_DEEP})`,
+                          display:"flex",alignItems:"center",justifyContent:"center",
+                          fontSize:14,color:"#fff",flexShrink:0,
+                          boxShadow:`0 2px 8px ${ORANGE}55`}}>
+                          →
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* rodapé */}
+          <div style={{marginTop:"3rem",borderTop:"1px solid rgba(212,160,23,0.2)",
+            paddingTop:"1.5rem",textAlign:"center"}}>
+            <p style={{margin:"0 0 4px",color:GOLD,fontSize:12,letterSpacing:3,
+              textTransform:"uppercase",fontWeight:700,fontFamily:FONT_BODY}}>✦ Start Delivery ✦</p>
+            <p style={{margin:0,color:"rgba(255,255,255,0.3)",fontSize:12,fontFamily:FONT_BODY}}>
+              C&E digital · Montividiu/GO
+            </p>
+          </div>
+        </div>
+
+        <style>{`
+          .st-desk-card{transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s ease,border-color .22s ease}
+          .st-desk-card:hover{transform:translateY(-5px) scale(1.02);box-shadow:0 16px 40px rgba(255,107,26,0.2);border-color:${ORANGE}55!important}
+        `}</style>
+      </div>
+    );
+  }
+
+  // ══════════════════════════════════════════════════════════════════
+  // MOBILE — layout original (mantido igual)
+  // ══════════════════════════════════════════════════════════════════
   return(
     <div className="st-screen" style={{maxWidth:540,margin:"0 auto",paddingBottom:"2rem"}}>
       <Toast msg={t.msg} color={t.color}/>
       <div style={{background:`linear-gradient(135deg, ${ORANGE} 0%, ${ORANGE_DEEP} 60%, ${NIGHT} 100%)`,padding:"1.75rem 1.5rem 2rem",position:"relative",overflow:"hidden"}}>
-        {/* detalhe dourado decorativo */}
         <div style={{position:"absolute",top:-30,right:-30,width:120,height:120,borderRadius:"50%",
           background:`radial-gradient(circle, ${GOLD}33 0%, transparent 70%)`,pointerEvents:"none"}}/>
         <img src={LOGO_START} alt="Start Delivery" style={{height:44,marginBottom:10,filter:"brightness(0) invert(1)"}}/>
@@ -1591,14 +1799,14 @@ export default function App(){
         }
       `}</style>
 
-      <div className="st-nav" style={{
+      <div className={`st-nav${tela==="cliente"?" st-nav-hide-desk":""}`} style={{
           borderBottom:`1px solid ${BORDER}`,
           background:`linear-gradient(180deg, ${BG} 0%, ${BG2}66 100%)`,
           backdropFilter:"blur(8px)",
           position:"sticky",top:0,zIndex:100,
           boxShadow:"0 1px 0 rgba(0,0,0,0.02), 0 4px 16px rgba(0,0,0,0.03)"
         }}>
-        <div style={{display:"flex",alignItems:"center",padding:"0 0.85rem",overflowX:"auto",position:"relative"}} className="st-cat-scroll">
+        <div style={{display:"flex",alignItems:"center",width:"100%",padding:"0 0.85rem",overflowX:"auto",position:"relative"}} className="st-cat-scroll">
           <img src={LOGO_START} alt="Start Delivery" style={{height:30,marginRight:14,flexShrink:0,filter:"invert(50%) sepia(1) saturate(5) hue-rotate(10deg)"}}/>
           <div style={{display:"flex",gap:4,position:"relative"}}>
             {abas.map(([id,icon,label])=>(
@@ -1609,15 +1817,13 @@ export default function App(){
                   color:tela===id?"#fff":MUTED,
                   fontWeight:tela===id?600:500,
                   flexShrink:0,whiteSpace:"nowrap",
-                  zIndex:2,
-                  transition:"color .25s ease"}}>
+                  zIndex:2,transition:"color .25s ease"}}>
                 {tela===id&&(
                   <span style={{
                     position:"absolute",inset:0,borderRadius:11,
                     background:`linear-gradient(135deg, ${ORANGE} 0%, ${ORANGE_DEEP} 100%)`,
                     boxShadow:`0 4px 14px ${ORANGE}55`,
-                    zIndex:-1,
-                    animation:"stNavPill .3s cubic-bezier(.22,1,.36,1) both"
+                    zIndex:-1,animation:"stNavPill .3s cubic-bezier(.22,1,.36,1) both"
                   }}/>
                 )}
                 <span style={{fontSize:15}}>{icon}</span>
@@ -1635,11 +1841,15 @@ export default function App(){
         <style>{`
           @keyframes stNavPill{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
           @keyframes stBadgePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+          /* esconde nav global no desktop quando na aba cliente (tem nav própria) */
+          @media(min-width:768px){
+            .st-nav-hide-desk{display:none!important}
+          }
         `}</style>
       </div>
 
       <div style={{minHeight:"70vh"}} key={tela}>
-        {tela==="cliente"    &&<PortalCliente    empresas={empresas}/>}
+        {tela==="cliente"    &&<PortalCliente    empresas={empresas} tela={tela} setTela={setTela}/>}
         {tela==="empresa"    &&<PainelEmpresa    pedidos={pedidos} empresas={empresas}/>}
         {tela==="entregador" &&<PainelEntregador pedidos={pedidos} empresas={empresas}/>}
         {tela==="admin"      &&<PainelAdmin      pedidos={pedidos} empresas={empresas}/>}
